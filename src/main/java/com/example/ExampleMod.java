@@ -1,24 +1,60 @@
-package com.example;
-
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class ExampleMod implements ModInitializer {
-	public static final String MOD_ID = "modid";
+public class FabricPayMod implements ModInitializer {
 
-	// This logger is used to write text to the console and the log file.
-	// It is considered best practice to use your mod id as the logger's name.
-	// That way, it's clear which mod wrote info, warnings, and errors.
-	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    @Override
+    public void onInitialize() {
+        // Mod initialization logic
+        System.out.println("FabricPayMod is initializing!");
+    }
 
-	@Override
-	public void onInitialize() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
+    public static void handlePayment(String chatMessage) {
+        // Match amounts from 100k to 2m
+        Pattern pattern = Pattern.compile("(\\w+) Paid you ((100k|200k|300k|400k|500k|600k|700k|800k|900k|1m|1\\.1m|1\\.2m|1\\.3m|1\\.4m|1\\.5m|1\\.6m|1\\.7m|1\\.8m|1\\.9m|2m))");
+        Matcher matcher = pattern.matcher(chatMessage);
 
-		LOGGER.info("Hello Fabric world!");
-	}
+        if (matcher.find()) {
+            String username = matcher.group(1);
+            String amountStr = matcher.group(2);
+            String doubledAmount = doubleAmount(amountStr);
+
+            Random random = new Random();
+            if (random.nextInt(100) < 30) { // 30% chance
+                String command = "/pay " + username + " " + doubledAmount;
+                sendCommand(command);
+                sendMessage(username, "Wow you just hit the jackpot");
+            } else {
+                sendMessage(username, "Oh no, you lost good luck next time");
+            }
+        }
+    }
+
+    // Doubles the amount string (basic string conversion)
+    public static String doubleAmount(String amount) {
+        if (amount.endsWith("k")) {
+            int value = Integer.parseInt(amount.replace("k", ""));
+            return (value * 2) + "k";
+        } else if (amount.endsWith("m")) {
+            double value = Double.parseDouble(amount.replace("m", ""));
+            return (value * 2) + "m";
+        }
+        return amount; // fallback
+    }
+
+    // Simulates sending a command in Minecraft
+    public static void sendCommand(String command) {
+        System.out.println("Executing command: " + command);
+    }
+
+    // Simulates sending a message to the player
+    public static void sendMessage(String username, String message) {
+        System.out.println("/msg " + username + " " + message);
+    }
 }
